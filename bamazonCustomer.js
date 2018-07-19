@@ -87,7 +87,34 @@ function buyProduct() {
         }
       },
     ]).then(function (answer) {
-      console.log(answer);
-      connection.end();
+      connection.query("SELECT * FROM products WHERE ?", { item_id: answer.itemId }, function (err, res) {
+        if (answer.requestedQty <= res[0].stock_quantity) {
+          var qtyUpdate = (res[0].stock_quantity - answer.requestedQty);
+          connection.query("UPDATE products SET ? WHERE ?",
+            [
+              {
+                stock_quantity: qtyUpdate
+              },
+              {
+                item_id: answer.itemId
+              }
+            ],
+            function (err, res) {
+              if (err) throw err;
+            }
+          );
+        }
+        else {
+          console.log("Only ".red + res[0].stock_quantity + " left in stock!".red);
+          connection.end();
+        }
+        customerTotal(parseInt(answer.requestedQty), parseInt(res[0].price));
+      });     
     })
+}
+function customerTotal(qty, price) {
+  console.log(qty);
+  console.log(price);
+  console.log("Customer Total".yellow + " = $" + (qty * price));
+  connection.end();
 }
