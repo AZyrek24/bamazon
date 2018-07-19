@@ -62,8 +62,8 @@ function buyProduct() {
         type: "input",
         message: "What item # would you like to buy?",
         validate: function (value) {
-          var input = value.trim();
-          if (isNaN(input) === false && input <= totalItemsLength && parseInt(input) > 0) {
+          var input = parseInt(value.trim());
+          if (isNaN(input) === false && input <= totalItemsLength && input > 0) {
             return true;
           } else {
             console.log("Must be a number. Try Again.")
@@ -76,7 +76,7 @@ function buyProduct() {
         type: "input",
         message: "How many would you like?",
         validate: function (value) {
-          var input = value.trim();
+          var input = parseInt(value.trim());
           if (isNaN(input)) {
             console.log("Must be a number. Try again.");
             return false;
