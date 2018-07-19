@@ -23,6 +23,12 @@ connection.connect(function (err) {
   showProducts();
 });
 
+// Global Variables
+//===================================================================================================
+var totalItemsLength;
+// Functions
+//===================================================================================================
+
 function showProducts() {
   connection.query("SELECT item_id, product_name, price FROM products", function (err, res) {
     if (err) throw err;
@@ -36,12 +42,52 @@ function showProducts() {
     console.log("---------------------------------------------------------------".cyan);
     for (var i = 0; i < res.length; i++) {
       if (res[i].item_id < 10) {
-        console.log(res[i].item_id + "       | " + res[i].product_name + "  $" + res[i].price);
+        console.log(res[i].item_id + "       | ".cyan + res[i].product_name + "  $" + res[i].price);
       }
-      else if (res[i].item_id >=10) {
-        console.log(res[i].item_id + "      | " + res[i].product_name + "  $" + res[i].price);
+      else if (res[i].item_id >= 10) {
+        console.log(res[i].item_id + "      | ".cyan + res[i].product_name + "  $" + res[i].price);
       }
     }
-    connection.end();
+    totalItemsLength = res.length;
+    console.log("\n");
+    buyProduct();
   });
+}
+
+function buyProduct() {
+  inquirer
+    .prompt([
+      {
+        name: "itemId",
+        type: "input",
+        message: "What item # would you like to buy?",
+        validate: function (value) {
+          var input = value.trim();
+          if (isNaN(input) === false && input <= totalItemsLength && parseInt(input) > 0) {
+            return true;
+          } else {
+            console.log("Must be a number. Try Again.")
+            return false;
+          }
+        }
+      },
+      {
+        name: "requestedQty",
+        type: "input",
+        message: "How many would you like?",
+        validate: function (value) {
+          var input = value.trim();
+          if (isNaN(input)) {
+            console.log("Must be a number. Try again.");
+            return false;
+          } else {
+            console.log("You want" + input + "many?");
+            return true;
+          }
+        }
+      },
+    ]).then(function (answer) {
+      console.log(answer);
+      connection.end();
+    })
 }
