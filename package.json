@@ -1,0 +1,25 @@
+{
+  "name": "bamazon",
+  "version": "1.0.0",
+  "description": "mock retail app using node.js and mysql",
+  "main": "bamazonCustomer.js",
+  "dependencies": {
+    "colors": "^1.3.0",
+    "inquirer": "^6.0.0",
+    "mysql": "^2.16.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AZyrek24/bamazon.git"
+  },
+  "author": "Tony Zyrek",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AZyrek24/bamazon/issues"
+  },
+  "homepage": "https://github.com/AZyrek24/bamazon#readme"
+}
