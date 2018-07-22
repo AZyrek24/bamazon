@@ -20,6 +20,7 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   console.log("connected as id " + connection.threadId + "\n");
+  banner();
   showOptions();
 });
 // Global Variables
@@ -65,6 +66,7 @@ function viewProducts() {
 
     // Log all results of the SELECT statement
     banner();
+    console.log("                                 PRODUCTS FOR SALE".green);
     console.log("-----------------------------------------------------------------------------------".cyan);
     for (var i = 0; i < res.length; i++) {
       if (res[i].item_id < 10) {
@@ -77,11 +79,26 @@ function viewProducts() {
       }
     }
     console.log("\n");
-    connection.end();
+    showOptions();
   });
 }
 function viewLowInventory() {
-  console.log("View Low Inventory".yellow);
+  connection.query("SELECT item_id, product_name, stock_quantity FROM products", function (err, res) {
+    if (err) throw err;
+
+    // Log all results of the SELECT statement
+    banner();
+    console.log("                                   LOW INVENTORY".red);
+    console.log("-----------------------------------------------------------------------------------".cyan);
+    for (var i = 0; i < res.length; i++) {
+      if (res[i].stock_quantity < 5) {
+        console.log(res[i].item_id + " |   ".cyan + res[i].product_name + "   | ".cyan + "  Qty: " + res[i].stock_quantity);
+        console.log("-----------------------------------------------------------------------------------".cyan);
+      }
+    }
+    console.log("\n");
+    showOptions();
+  });
 }
 function addToInventory() {
   console.log("Add to Inventory".yellow);
