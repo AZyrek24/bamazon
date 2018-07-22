@@ -42,10 +42,10 @@ function showProducts() {
     console.log("---------------------------------------------------------------".cyan);
     for (var i = 0; i < res.length; i++) {
       if (res[i].item_id < 10) {
-        console.log(res[i].item_id + "       | ".cyan + res[i].product_name + "  $" + res[i].price);
+        console.log(res[i].item_id + "       | ".cyan + res[i].product_name + "|".cyan + "  $" + res[i].price);
       }
       else if (res[i].item_id >= 10) {
-        console.log(res[i].item_id + "      | ".cyan + res[i].product_name + "  $" + res[i].price);
+        console.log(res[i].item_id + "      | ".cyan + res[i].product_name + "|".cyan + "  $" + res[i].price);
       }
     }
     totalItemsLength = res.length;
