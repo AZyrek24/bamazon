@@ -26,6 +26,8 @@ connection.connect(function (err) {
 // Global Variables
 //===================================================================================================
 var totalItemsLength;
+var currentQty = 0;
+var addQty = 0;
 // Functions
 //===================================================================================================
 
@@ -126,6 +128,9 @@ function addToInventory() {
           validate: function (value) {
             var input = parseInt(value.trim());
             if (isNaN(input) === false && input <= totalItemsLength && input > 0) {
+              connection.query('SELECT * FROM products WHERE item_id = ' + input, function(err, res) {
+                currentQty = res[0].stock_quantity;
+              }) 
               return true;
             } else {
               console.log("Must be a number. Try Again.");
@@ -149,11 +154,12 @@ function addToInventory() {
         }
       ])
       .then(function (answer) {
+        addQty = parseInt(answer.qtyToAdd);
         connection.query(
           "UPDATE products SET ? WHERE ?",
           [
             {
-              stock_quantity: (res[0].stock_quantity + parseInt(answer.qtyToAdd))
+              stock_quantity: currentQty + addQty
             },
             {
               item_id: answer.addToItem

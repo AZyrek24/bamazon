@@ -89,7 +89,7 @@ function buyProduct() {
     ]).then(function (answer) {
       connection.query("SELECT * FROM products WHERE ?", { item_id: answer.itemId }, function (err, res) {
         if (answer.requestedQty <= res[0].stock_quantity) {
-          var qtyUpdate = (res[0].stock_quantity - answer.requestedQty);
+          var qtyUpdate = (res[0].stock_quantity - answer.requestedQty).toFixed(2);
           connection.query("UPDATE products SET ? WHERE ?",
             [
               {
