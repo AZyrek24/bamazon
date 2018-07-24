@@ -6,7 +6,7 @@ var colors = require('colors');
 var connection = mysql.createConnection({
   host: "localhost",
 
-  // Your port; if not 3306
+  // Your port; if not 8889
   port: 8889,
 
   // Your username
@@ -48,7 +48,7 @@ function showProducts() {
         console.log(res[i].item_id + "      | ".cyan + res[i].product_name + "|".cyan + "  $" + res[i].price);
       }
     }
-    totalItemsLength = res.length;
+    totalItemsLength = res.length + 1;
     console.log("\n");
     buyProduct();
   });
@@ -66,7 +66,7 @@ function buyProduct() {
           if (isNaN(input) === false && input <= totalItemsLength && input > 0) {
             return true;
           } else {
-            console.log("Must be a number. Try Again.")
+            console.log("Must be equal to an item #. Try Again.")
             return false;
           }
         }
@@ -103,18 +103,18 @@ function buyProduct() {
               if (err) throw err;
             }
           );
+          customerTotal(answer.requestedQty, res[0].price);
         }
         else {
           console.log("Only ".red + res[0].stock_quantity + " left in stock!".red);
           connection.end();
         }
-        customerTotal(parseInt(answer.requestedQty), parseInt(res[0].price));
-      });     
+      });
     })
 }
 function customerTotal(qty, price) {
-  console.log(qty);
-  console.log(price);
+  console.log("Qty: ".cyan + qty);
+  console.log("Price each:".cyan + " $" + price);
   console.log("Customer Total".yellow + " = $" + (qty * price));
   connection.end();
 }

@@ -6,7 +6,7 @@ var colors = require('colors');
 var connection = mysql.createConnection({
   host: "localhost",
 
-  // Your port; if not 3306
+  // Your port; if not 8889
   port: 8889,
 
   // Your username
@@ -25,16 +25,17 @@ connection.connect(function (err) {
 });
 // Global Variables
 //===================================================================================================
-
+var totalItemsLength;
 // Functions
 //===================================================================================================
 
 // Displays Bamazon banner
-function banner () {
+function banner() {
+  console.log("\n===================================================================================".yellow);
+  console.log("                                 Bamazon Manager".yellow);
   console.log("===================================================================================".yellow);
-    console.log("                                 Bamazon Manager".yellow);
-    console.log("===================================================================================".yellow);
 }
+// Prompts which function to call
 function showOptions() {
   inquirer
     .prompt({
@@ -43,7 +44,7 @@ function showOptions() {
       message: "What would you like to do?",
       choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product"]
     })
-    .then(function(answer) {
+    .then(function (answer) {
       switch (answer.chosen) {
         case "View Products for Sale":
           viewProducts();
@@ -56,25 +57,29 @@ function showOptions() {
           break;
         case "Add New Product":
           addNewProduct();
-          break;                   
+          break;
       }
     });
 }
+// Logs all products in inventory
 function viewProducts() {
-  connection.query("SELECT item_id, product_name, price, stock_quantity FROM products", function (err, res) {
+  connection.query("SELECT * FROM products", function (err, res) {
     if (err) throw err;
 
     // Log all results of the SELECT statement
+    totalItemsLength = res.length + 1;
     banner();
-    console.log("                                 PRODUCTS FOR SALE".green);
+    console.log("                                PRODUCTS FOR SALE".green);
     console.log("-----------------------------------------------------------------------------------".cyan);
+    console.log("Item #  |          Product, Price, Stock".cyan);
+    console.log("---------------------------------------------------------------".cyan);
     for (var i = 0; i < res.length; i++) {
       if (res[i].item_id < 10) {
-        console.log(res[i].item_id + " |   ".cyan + res[i].product_name + "   | ".cyan + "  $ " + res[i].price + "   |   ".cyan + "Qty: " + res[i].stock_quantity);
+        console.log(res[i].item_id + "       |   ".cyan + res[i].product_name + "   | ".cyan + "  $ " + (res[i].price).toFixed(2) + "   |   ".cyan + "Qty: " + res[i].stock_quantity);
         console.log("-----------------------------------------------------------------------------------".cyan);
       }
       else if (res[i].item_id >= 10) {
-        console.log(res[i].item_id + " |   ".cyan + res[i].product_name + "   | ".cyan + "  $" + res[i].price + "   |   ".cyan + "Qty: " + res[i].stock_quantity);
+        console.log(res[i].item_id + "      |   ".cyan + res[i].product_name + "   | ".cyan + "  $" + (res[i].price).toFixed(2) + "   |   ".cyan + "Qty: " + res[i].stock_quantity);
         console.log("-----------------------------------------------------------------------------------".cyan);
       }
     }
@@ -82,17 +87,25 @@ function viewProducts() {
     showOptions();
   });
 }
+// Logs all inventory that has a quantity lower than 5
 function viewLowInventory() {
   connection.query("SELECT item_id, product_name, stock_quantity FROM products", function (err, res) {
     if (err) throw err;
 
     // Log all results of the SELECT statement
+    totalItemsLength = res.length + 1;
     banner();
-    console.log("                                   LOW INVENTORY".red);
+    console.log("                                  LOW INVENTORY".red);
     console.log("-----------------------------------------------------------------------------------".cyan);
+    console.log("Item # |".cyan);
+    console.log("---------------------------------------------------------------".cyan);
     for (var i = 0; i < res.length; i++) {
-      if (res[i].stock_quantity < 5) {
-        console.log(res[i].item_id + " |   ".cyan + res[i].product_name + "   | ".cyan + "  Qty: " + res[i].stock_quantity);
+      if (res[i].stock_quantity < 5 && res[i].item_id < 10) {
+        console.log(res[i].item_id + "      |   ".cyan + res[i].product_name + "   | ".cyan + "  Qty: " + res[i].stock_quantity);
+        console.log("-----------------------------------------------------------------------------------".cyan);
+      }
+      else if (res[i].stock_quantity < 5 && res[i].item_id >= 10) {
+        console.log(res[i].item_id + "       |   ".cyan + res[i].product_name + "   | ".cyan + "  Qty: " + res[i].stock_quantity);
         console.log("-----------------------------------------------------------------------------------".cyan);
       }
     }
@@ -100,9 +113,122 @@ function viewLowInventory() {
     showOptions();
   });
 }
+// Prompts for the item number to add, then prompts for quantity to add
 function addToInventory() {
-  console.log("Add to Inventory".yellow);
+  connection.query('SELECT * FROM products', function (err, res) {
+    totalItemsLength = res.length + 1;
+    inquirer
+      .prompt([
+        {
+          name: "addToItem",
+          type: "input",
+          message: "Which item # would you like to add inventory to?",
+          validate: function (value) {
+            var input = parseInt(value.trim());
+            if (isNaN(input) === false && input <= totalItemsLength && input > 0) {
+              return true;
+            } else {
+              console.log("Must be a number. Try Again.");
+              return false;
+            }
+          }
+        },
+        {
+          name: "qtyToAdd",
+          type: "input",
+          message: "What quantity would you like to add?",
+          validate: function (value) {
+            var input = parseInt(value.trim());
+            if (isNaN(input) === false && input > 0) {
+              return true;
+            } else {
+              console.log("Must be a number greater than zero. Try Again.");
+              return false;
+            }
+          }
+        }
+      ])
+      .then(function (answer) {
+        connection.query(
+          "UPDATE products SET ? WHERE ?",
+          [
+            {
+              stock_quantity: (res[0].stock_quantity + parseInt(answer.qtyToAdd))
+            },
+            {
+              item_id: answer.addToItem
+            }
+          ],
+          function (error) {
+            if (error) throw err;
+            console.log(answer.qtyToAdd + " units added to inventory.".yellow);
+            connection.end();
+          }
+        )
+      });
+  })
 }
+
 function addNewProduct() {
-  console.log("Add a new product".yellow);
+  connection.query('SELECT * FROM products', function (err, res) {
+    totalItemsLength = res.length + 1;
+    inquirer
+      .prompt([
+        {
+          name: "productName",
+          type: "input",
+          message: "What is the name of the product?",
+        },
+        {
+          name: "productDept",
+          type: "input",
+          message: "Which department does this item belong to?",
+        },
+        {
+          name: "price",
+          type: "input",
+          message: "What is the price?",
+          validate: function (value) {
+            var input = parseInt(value.trim()).toFixed(2);
+            if (isNaN(input) === false && input > 0) {
+              return true;
+            } else {
+              console.log("Must be a number greater than zero. Try Again.");
+              return false;
+            }
+          } 
+        },
+        {
+          name: "qty",
+          type: "input",
+          message: "What quantity would you like to add?",
+          validate: function (value) {
+            var input = parseInt(value.trim());
+            if (isNaN(input) === false && input > 0) {
+              return true;
+            } else {
+              console.log("Must be a number greater than zero. Try Again.");
+              return false;
+            }
+          }
+        }
+      ])
+      .then(function (answer) {
+        connection.query(
+          "INSERT INTO products SET ?",
+          {
+            product_name: answer.productName,
+            department_name: answer.productDept,
+            price: answer.price,
+            stock_quantity: answer.qty
+            
+          },
+          function(err) {
+            if (err) throw err;
+            console.log(answer.qty + " of " + answer.productName + " was added to products.".yellow);
+            connection.end();
+          }
+        );
+      });
+  })
 }
