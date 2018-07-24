@@ -113,8 +113,7 @@ function buyProduct() {
     })
 }
 function customerTotal(qty, price) {
-  console.log("Qty: ".cyan + qty);
-  console.log("Price each:".cyan + " $" + price);
-  console.log("Customer Total".yellow + " = $" + (qty * price));
+  var total = (qty * price).toFixed(2);
+  console.log("\nCustomer Total".yellow + " = $" + total + "\n");
   connection.end();
 }
