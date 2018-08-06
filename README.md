@@ -1,7 +1,7 @@
 # Bamazon & Bamazon Manager
 Please copy the following link in Google Chrome to view a demo on how to install and run Bamazon's functions:
 
-chrome-extension://mmeijimgabbpbgpdklnllpncmdofkcpn/app.html#/files/61ae2790-704f-46c1-y213-51c708dc7080
+https://drive.google.com/open?id=1_cCwFsaT6TPrxvd2m32WXMcQHyEAdRKa
 #
 Bamazon is a mock online store in which a user can purchase items from a list by following some prompts in the terminal. Making a purchase displays a customer total.
 
